@@ -1,27 +1,29 @@
 import SwiftUI
 
 enum TimeControlType: String, CaseIterable {
-    case simple = "Simple"
-    case increment = "Increment"
+    case classical = "Classical"
+    case rapid = "Rapid"
+    case blitz = "Blitz"
+    case bullet = "Bullet"
 }
 
-struct GameSettings: Equatable {
-    var team1Player1Name: String = "Player1"
-    var team1Player2Name: String = "Player3"
-    var team2Player1Name: String = "Player2"
-    var team2Player2Name: String = "Player4"
-    var timeControlType: TimeControlType = .simple
-    var baseMinutes: Int = 5
-    var incrementSeconds: Int = 0
+class GameSettings: ObservableObject, Equatable {
+    @Published var player1Name: String = "Player 1"
+    @Published var player2Name: String = "Player 2"
+    @Published var player3Name: String = "Player 3"
+    @Published var player4Name: String = "Player 4"
+    @Published var baseMinutes: Int = 5
+    @Published var incrementSeconds: Int = 0
+    @Published var timeControlType: TimeControlType = .rapid
     
     static func == (lhs: GameSettings, rhs: GameSettings) -> Bool {
-        return lhs.team1Player1Name == rhs.team1Player1Name &&
-               lhs.team1Player2Name == rhs.team1Player2Name &&
-               lhs.team2Player1Name == rhs.team2Player1Name &&
-               lhs.team2Player2Name == rhs.team2Player2Name &&
-               lhs.timeControlType == rhs.timeControlType &&
+        return lhs.player1Name == rhs.player1Name &&
+               lhs.player2Name == rhs.player2Name &&
+               lhs.player3Name == rhs.player3Name &&
+               lhs.player4Name == rhs.player4Name &&
                lhs.baseMinutes == rhs.baseMinutes &&
-               lhs.incrementSeconds == rhs.incrementSeconds
+               lhs.incrementSeconds == rhs.incrementSeconds &&
+               lhs.timeControlType == rhs.timeControlType
     }
 }
 
@@ -36,10 +38,10 @@ struct SettingsView: View {
         NavigationView {
             Form {
                 Section(header: Text("Player Names")) {
-                    TextField("Player 1", text: $settings.team1Player1Name)
-                    TextField("Player 2", text: $settings.team2Player1Name)
-                    TextField("Player 3", text: $settings.team1Player2Name)
-                    TextField("Player 4", text: $settings.team2Player2Name)
+                    TextField("Player 1", text: $settings.player1Name)
+                    TextField("Player 2", text: $settings.player2Name)
+                    TextField("Player 3", text: $settings.player3Name)
+                    TextField("Player 4", text: $settings.player4Name)
                 }
                 
                 Section(header: Text("Time Control")) {
@@ -63,7 +65,7 @@ struct SettingsView: View {
                             }
                     }
                     
-                    if settings.timeControlType == .increment {
+                    if settings.timeControlType == .rapid || settings.timeControlType == .blitz || settings.timeControlType == .bullet {
                         HStack {
                             Text("Increment (seconds):")
                             TextField("Seconds", text: $incrementSecondsText)

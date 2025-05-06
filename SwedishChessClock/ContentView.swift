@@ -1,159 +1,160 @@
 import SwiftUI
 
 struct ContentView: View {
-    @StateObject private var board1State = GameState(settings: GameSettings())
-    @StateObject private var board2State = GameState(settings: GameSettings())
+    @State private var settings: GameSettings
+    @StateObject private var board1State: GameState
+    @StateObject private var board2State: GameState
     @State private var showingSettings = false
     
+    init(settings: GameSettings) {
+        _settings = State(initialValue: settings)
+        _board1State = StateObject(wrappedValue: GameState(settings: settings))
+        _board2State = StateObject(wrappedValue: GameState(settings: settings))
+    }
+    
     var body: some View {
-        ZStack {
-            // Main layout with 4 player zones
-            HStack(spacing: 0) {
-                // Team 1 (Left side)
-                VStack(spacing: 0) {
-                    // Board 1 - Player 1
-                    ZStack {
-                        Rectangle()
-                            .fill(board1State.activeTeam == 1 ? Color.blue.opacity(0.3) : Color.gray.opacity(0.2))
-                        VStack {
-                            Text(board1State.settings.team1Player1Name)
-                                .font(.subheadline)
-                                .foregroundColor(.primary)
-                            Text(timeString(board1State.timeRemaining1))
-                                .font(.system(size: 48, weight: .bold, design: .monospaced))
-                                .foregroundColor(board1State.timeRemaining1 < 10 ? .red : .primary)
+        NavigationView {
+            ZStack {
+                Color(.systemBackground).edgesIgnoringSafeArea(.all)
+                
+                // Main layout with 4 player zones
+                HStack(spacing: 0) {
+                    // Team 1 (Left side)
+                    VStack(spacing: 0) {
+                        // Board 1 - Player 1
+                        ZStack {
+                            Rectangle()
+                                .fill(board1State.activeTeam == 1 ? Color.blue.opacity(0.3) : Color.gray.opacity(0.2))
+                            VStack {
+                                Text(board1State.settings.player1Name)
+                                    .font(.subheadline)
+                                    .foregroundColor(.primary)
+                                Text(timeString(board1State.timeRemaining1))
+                                    .font(.system(size: 48, weight: .bold, design: .monospaced))
+                                    .foregroundColor(board1State.timeRemaining1 < 10 ? .red : .primary)
+                            }
                         }
-                    }
-                    .onTapGesture {
-                        board1State.toggleClock()
+                        .onTapGesture {
+                            board1State.toggleClock()
+                        }
+                        
+                        // Board 2 - Player 3
+                        ZStack {
+                            Rectangle()
+                                .fill(board2State.activeTeam == 1 ? Color.blue.opacity(0.3) : Color.gray.opacity(0.2))
+                            VStack {
+                                Text(board2State.settings.player3Name)
+                                    .font(.subheadline)
+                                    .foregroundColor(.primary)
+                                Text(timeString(board2State.timeRemaining1))
+                                    .font(.system(size: 48, weight: .bold, design: .monospaced))
+                                    .foregroundColor(board2State.timeRemaining1 < 10 ? .red : .primary)
+                            }
+                        }
+                        .onTapGesture {
+                            board2State.toggleClock()
+                        }
                     }
                     
-                    // Board 2 - Player 3
-                    ZStack {
-                        Rectangle()
-                            .fill(board2State.activeTeam == 1 ? Color.blue.opacity(0.3) : Color.gray.opacity(0.2))
-                        VStack {
-                            Text(board2State.settings.team1Player2Name)
-                                .font(.subheadline)
-                                .foregroundColor(.primary)
-                            Text(timeString(board2State.timeRemaining1))
-                                .font(.system(size: 48, weight: .bold, design: .monospaced))
-                                .foregroundColor(board2State.timeRemaining1 < 10 ? .red : .primary)
+                    // Team 2 (Right side)
+                    VStack(spacing: 0) {
+                        // Board 1 - Player 2
+                        ZStack {
+                            Rectangle()
+                                .fill(board1State.activeTeam == 2 ? Color.blue.opacity(0.3) : Color.gray.opacity(0.2))
+                            VStack {
+                                Text(board1State.settings.player2Name)
+                                    .font(.subheadline)
+                                    .foregroundColor(.primary)
+                                Text(timeString(board1State.timeRemaining2))
+                                    .font(.system(size: 48, weight: .bold, design: .monospaced))
+                                    .foregroundColor(board1State.timeRemaining2 < 10 ? .red : .primary)
+                            }
                         }
-                    }
-                    .onTapGesture {
-                        board2State.toggleClock()
+                        .onTapGesture {
+                            board1State.toggleClock()
+                        }
+                        
+                        // Board 2 - Player 4
+                        ZStack {
+                            Rectangle()
+                                .fill(board2State.activeTeam == 2 ? Color.blue.opacity(0.3) : Color.gray.opacity(0.2))
+                            VStack {
+                                Text(board2State.settings.player4Name)
+                                    .font(.subheadline)
+                                    .foregroundColor(.primary)
+                                Text(timeString(board2State.timeRemaining2))
+                                    .font(.system(size: 48, weight: .bold, design: .monospaced))
+                                    .foregroundColor(board2State.timeRemaining2 < 10 ? .red : .primary)
+                            }
+                        }
+                        .onTapGesture {
+                            board2State.toggleClock()
+                        }
                     }
                 }
                 
-                // Team 2 (Right side)
-                VStack(spacing: 0) {
-                    // Board 1 - Player 2
-                    ZStack {
-                        Rectangle()
-                            .fill(board1State.activeTeam == 2 ? Color.blue.opacity(0.3) : Color.gray.opacity(0.2))
-                        VStack {
-                            Text(board1State.settings.team2Player1Name)
-                                .font(.subheadline)
-                                .foregroundColor(.primary)
-                            Text(timeString(board1State.timeRemaining2))
-                                .font(.system(size: 48, weight: .bold, design: .monospaced))
-                                .foregroundColor(board1State.timeRemaining2 < 10 ? .red : .primary)
-                        }
-                    }
-                    .onTapGesture {
-                        board1State.toggleClock()
-                    }
-                    
-                    // Board 2 - Player 4
-                    ZStack {
-                        Rectangle()
-                            .fill(board2State.activeTeam == 2 ? Color.blue.opacity(0.3) : Color.gray.opacity(0.2))
-                        VStack {
-                            Text(board2State.settings.team2Player2Name)
-                                .font(.subheadline)
-                                .foregroundColor(.primary)
-                            Text(timeString(board2State.timeRemaining2))
-                                .font(.system(size: 48, weight: .bold, design: .monospaced))
-                                .foregroundColor(board2State.timeRemaining2 < 10 ? .red : .primary)
-                        }
-                    }
-                    .onTapGesture {
-                        board2State.toggleClock()
-                    }
-                }
-            }
-            
-            // Overlay controls
-            VStack {
-                Spacer()
-                HStack(spacing: 20) {
-                    Button(action: {
-                        board1State.togglePause()
-                        board2State.togglePause()
-                    }) {
-                        Image(systemName: board1State.isPaused ? "play.fill" : "pause.fill")
-                            .font(.title)
-                            .foregroundColor(.white)
-                            .frame(width: 60, height: 60)
-                            .background(Color.blue)
-                            .clipShape(Circle())
-                    }
-                    .disabled(!board1State.isRunning)
-                    
-                    Button(action: {
-                        board1State.startNewGame()
-                        board2State.startNewGame()
-                    }) {
-                        Image(systemName: "arrow.clockwise")
-                            .font(.title)
-                            .foregroundColor(.white)
-                            .frame(width: 60, height: 60)
-                            .background(Color.green)
-                            .clipShape(Circle())
-                    }
-                }
-                .padding(.bottom, 20)
-            }
-            
-            // Settings button overlay
-            VStack {
-                HStack {
+                // Overlay controls
+                VStack {
                     Spacer()
-                    Button(action: {
-                        showingSettings = true
-                    }) {
-                        Image(systemName: "gear")
-                            .font(.title2)
-                            .foregroundColor(.primary)
-                            .padding()
+                    HStack(spacing: 20) {
+                        Button(action: {
+                            board1State.togglePause()
+                            board2State.togglePause()
+                        }) {
+                            Image(systemName: board1State.isPaused ? "play.fill" : "pause.fill")
+                                .font(.title)
+                                .foregroundColor(.white)
+                                .frame(width: 60, height: 60)
+                                .background(Color.blue)
+                                .clipShape(Circle())
+                        }
+                        .disabled(!board1State.isRunning)
+                        
+                        Button(action: {
+                            board1State.startNewGame()
+                            board2State.startNewGame()
+                        }) {
+                            Image(systemName: "arrow.clockwise")
+                                .font(.title)
+                                .foregroundColor(.white)
+                                .frame(width: 60, height: 60)
+                                .background(Color.green)
+                                .clipShape(Circle())
+                        }
                     }
+                    .padding(.bottom, 20)
                 }
-                Spacer()
             }
+            .navigationBarItems(trailing: Button(action: {
+                showingSettings = true
+            }) {
+                Image(systemName: "gear")
+                    .font(.title2)
+                    .foregroundColor(.primary)
+            })
         }
         .sheet(isPresented: $showingSettings) {
-            SettingsView(settings: $board1State.settings, isGameRunning: board1State.isRunning)
+            SettingsView(settings: $settings, isGameRunning: board1State.isRunning)
         }
-        .onChange(of: board1State.settings) { newSettings in
+        .onChange(of: settings) { newSettings in
+            board1State.settings = newSettings
             board2State.settings = newSettings
             // Reset both boards with new settings
             board1State.startNewGame()
             board2State.startNewGame()
         }
         .alert("Game Over", isPresented: $board1State.gameOver) {
-            VStack {
-                Button("New Game") {
-                    board1State.startNewGame()
-                    board2State.startNewGame()
-                }
-                Button("Keep Current State", role: .cancel) {}
+            Button("New Game") {
+                board1State.startNewGame()
+                board2State.startNewGame()
             }
+            Button("Keep Current State", role: .cancel) {}
         } message: {
             if board1State.winningTeam == 1 {
-                Text("\(board1State.settings.team1Player1Name) and \(board1State.settings.team1Player2Name) win!")
+                Text("\(board1State.settings.player1Name) and \(board1State.settings.player3Name) win!")
             } else {
-                Text("\(board1State.settings.team2Player1Name) and \(board1State.settings.team2Player2Name) win!")
+                Text("\(board1State.settings.player2Name) and \(board1State.settings.player4Name) win!")
             }
         }
     }
@@ -196,7 +197,7 @@ class GameState: ObservableObject {
             activeTeam = activeTeam == 1 ? 2 : 1
             
             // Add increment if using increment time control
-            if settings.timeControlType == .increment {
+            if settings.timeControlType == .rapid || settings.timeControlType == .blitz || settings.timeControlType == .bullet {
                 if activeTeam == 1 {
                     timeRemaining1 += TimeInterval(settings.incrementSeconds)
                 } else {
@@ -257,5 +258,5 @@ class GameState: ObservableObject {
 }
 
 #Preview {
-    ContentView()
+    ContentView(settings: GameSettings())
 } 
