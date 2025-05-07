@@ -17,11 +17,11 @@ struct ContentView: View {
             ZStack {
                 Color(.systemBackground).edgesIgnoringSafeArea(.all)
                 
-                // Main layout with 4 player zones
+                // Main layout with 2 boards side by side
                 HStack(spacing: 0) {
-                    // Team 1 (Left side)
+                    // Left side - Board 1 (Team 1 & 2)
                     VStack(spacing: 0) {
-                        // Board 1 - Player 1
+                        // Board 1 - Team 1
                         ZStack {
                             Rectangle()
                                 .fill(board1State.activeTeam == 1 ? Color.blue.opacity(0.3) : Color.gray.opacity(0.2))
@@ -38,27 +38,7 @@ struct ContentView: View {
                             board1State.toggleClock()
                         }
                         
-                        // Board 2 - Player 3
-                        ZStack {
-                            Rectangle()
-                                .fill(board2State.activeTeam == 1 ? Color.blue.opacity(0.3) : Color.gray.opacity(0.2))
-                            VStack {
-                                Text(board2State.settings.player3Name)
-                                    .font(.subheadline)
-                                    .foregroundColor(.primary)
-                                Text(timeString(board2State.timeRemaining1))
-                                    .font(.system(size: 48, weight: .bold, design: .monospaced))
-                                    .foregroundColor(board2State.timeRemaining1 < 10 ? .red : .primary)
-                            }
-                        }
-                        .onTapGesture {
-                            board2State.toggleClock()
-                        }
-                    }
-                    
-                    // Team 2 (Right side)
-                    VStack(spacing: 0) {
-                        // Board 1 - Player 2
+                        // Board 1 - Team 2
                         ZStack {
                             Rectangle()
                                 .fill(board1State.activeTeam == 2 ? Color.blue.opacity(0.3) : Color.gray.opacity(0.2))
@@ -74,8 +54,28 @@ struct ContentView: View {
                         .onTapGesture {
                             board1State.toggleClock()
                         }
+                    }
+                    
+                    // Right side - Board 2 (Team 3 & 4)
+                    VStack(spacing: 0) {
+                        // Board 2 - Team 3
+                        ZStack {
+                            Rectangle()
+                                .fill(board2State.activeTeam == 1 ? Color.blue.opacity(0.3) : Color.gray.opacity(0.2))
+                            VStack {
+                                Text(board2State.settings.player3Name)
+                                    .font(.subheadline)
+                                    .foregroundColor(.primary)
+                                Text(timeString(board2State.timeRemaining1))
+                                    .font(.system(size: 48, weight: .bold, design: .monospaced))
+                                    .foregroundColor(board2State.timeRemaining1 < 10 ? .red : .primary)
+                            }
+                        }
+                        .onTapGesture {
+                            board2State.toggleClock()
+                        }
                         
-                        // Board 2 - Player 4
+                        // Board 2 - Team 4
                         ZStack {
                             Rectangle()
                                 .fill(board2State.activeTeam == 2 ? Color.blue.opacity(0.3) : Color.gray.opacity(0.2))
@@ -152,9 +152,9 @@ struct ContentView: View {
             Button("Keep Current State", role: .cancel) {}
         } message: {
             if board1State.winningTeam == 1 {
-                Text("\(board1State.settings.player1Name) and \(board1State.settings.player3Name) win!")
+                Text("\(board1State.settings.player1Name) and \(board1State.settings.player2Name) win!")
             } else {
-                Text("\(board1State.settings.player2Name) and \(board1State.settings.player4Name) win!")
+                Text("\(board1State.settings.player3Name) and \(board1State.settings.player4Name) win!")
             }
         }
     }
