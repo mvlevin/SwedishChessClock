@@ -17,153 +17,129 @@ struct ContentView: View {
             ZStack {
                 Color(.systemBackground).edgesIgnoringSafeArea(.all)
                 
-                // Main layout with 2 boards side by side
-                HStack(spacing: 0) {
-                    // Left side - Board 1 (Team 1 & 2)
-                    VStack(spacing: 0) {
-                        // Board 1 - Team 1
-                        ZStack {
-                            Rectangle()
-                                .fill(board1State.activeTeam == 1 ? Color.blue.opacity(0.3) : Color.gray.opacity(0.2))
-                            VStack {
-                                Text(board1State.settings.player1Name)
-                                    .font(.subheadline)
-                                    .foregroundColor(.primary)
-                                Text(timeString(board1State.timeRemaining1))
-                                    .font(.system(size: 48, weight: .bold, design: .monospaced))
-                                    .foregroundColor(board1State.timeRemaining1 < 10 ? .red : .primary)
+                // Main layout with top team vs bottom team
+                VStack(spacing: 0) {
+                    // Top team (Players 1 and 3)
+                    HStack(spacing: 0) {
+                        // Left side (Player 1)
+                        VStack {
+                            Text(settings.player1Name)
+                                .font(.headline)
+                                .padding(.bottom, 5)
+                            
+                            ZStack {
+                                Rectangle()
+                                    .fill(board1State.activeTeam == 1 ? Color.green.opacity(0.3) : Color.clear)
+                                    .frame(height: 100)
+                                
+                                Text(formatTime(board1State.timeRemaining1))
+                                    .font(.system(size: 40, weight: .bold, design: .monospaced))
+                            }
+                            .onTapGesture {
+                                if !board1State.gameOver {
+                                    board1State.toggleClock()
+                                }
                             }
                         }
-                        .onTapGesture {
-                            board1State.toggleClock()
-                        }
+                        .frame(maxWidth: .infinity)
                         
-                        // Board 1 - Team 2
-                        ZStack {
-                            Rectangle()
-                                .fill(board1State.activeTeam == 2 ? Color.blue.opacity(0.3) : Color.gray.opacity(0.2))
-                            VStack {
-                                Text(board1State.settings.player2Name)
-                                    .font(.subheadline)
-                                    .foregroundColor(.primary)
-                                Text(timeString(board1State.timeRemaining2))
-                                    .font(.system(size: 48, weight: .bold, design: .monospaced))
-                                    .foregroundColor(board1State.timeRemaining2 < 10 ? .red : .primary)
+                        // Right side (Player 3)
+                        VStack {
+                            Text(settings.player3Name)
+                                .font(.headline)
+                                .padding(.bottom, 5)
+                            
+                            ZStack {
+                                Rectangle()
+                                    .fill(board2State.activeTeam == 1 ? Color.green.opacity(0.3) : Color.clear)
+                                    .frame(height: 100)
+                                
+                                Text(formatTime(board2State.timeRemaining1))
+                                    .font(.system(size: 40, weight: .bold, design: .monospaced))
+                            }
+                            .onTapGesture {
+                                if !board2State.gameOver {
+                                    board2State.toggleClock()
+                                }
                             }
                         }
-                        .onTapGesture {
-                            board1State.toggleClock()
-                        }
+                        .frame(maxWidth: .infinity)
                     }
                     
-                    // Right side - Board 2 (Team 3 & 4)
-                    VStack(spacing: 0) {
-                        // Board 2 - Team 3
-                        ZStack {
-                            Rectangle()
-                                .fill(board2State.activeTeam == 1 ? Color.blue.opacity(0.3) : Color.gray.opacity(0.2))
-                            VStack {
-                                Text(board2State.settings.player3Name)
-                                    .font(.subheadline)
-                                    .foregroundColor(.primary)
-                                Text(timeString(board2State.timeRemaining1))
-                                    .font(.system(size: 48, weight: .bold, design: .monospaced))
-                                    .foregroundColor(board2State.timeRemaining1 < 10 ? .red : .primary)
+                    // Bottom team (Players 2 and 4)
+                    HStack(spacing: 0) {
+                        // Left side (Player 2)
+                        VStack {
+                            Text(settings.player2Name)
+                                .font(.headline)
+                                .padding(.bottom, 5)
+                            
+                            ZStack {
+                                Rectangle()
+                                    .fill(board1State.activeTeam == 2 ? Color.green.opacity(0.3) : Color.clear)
+                                    .frame(height: 100)
+                                
+                                Text(formatTime(board1State.timeRemaining2))
+                                    .font(.system(size: 40, weight: .bold, design: .monospaced))
+                            }
+                            .onTapGesture {
+                                if !board1State.gameOver {
+                                    board1State.toggleClock()
+                                }
                             }
                         }
-                        .onTapGesture {
-                            board2State.toggleClock()
-                        }
+                        .frame(maxWidth: .infinity)
                         
-                        // Board 2 - Team 4
-                        ZStack {
-                            Rectangle()
-                                .fill(board2State.activeTeam == 2 ? Color.blue.opacity(0.3) : Color.gray.opacity(0.2))
-                            VStack {
-                                Text(board2State.settings.player4Name)
-                                    .font(.subheadline)
-                                    .foregroundColor(.primary)
-                                Text(timeString(board2State.timeRemaining2))
-                                    .font(.system(size: 48, weight: .bold, design: .monospaced))
-                                    .foregroundColor(board2State.timeRemaining2 < 10 ? .red : .primary)
+                        // Right side (Player 4)
+                        VStack {
+                            Text(settings.player4Name)
+                                .font(.headline)
+                                .padding(.bottom, 5)
+                            
+                            ZStack {
+                                Rectangle()
+                                    .fill(board2State.activeTeam == 2 ? Color.green.opacity(0.3) : Color.clear)
+                                    .frame(height: 100)
+                                
+                                Text(formatTime(board2State.timeRemaining2))
+                                    .font(.system(size: 40, weight: .bold, design: .monospaced))
+                            }
+                            .onTapGesture {
+                                if !board2State.gameOver {
+                                    board2State.toggleClock()
+                                }
                             }
                         }
-                        .onTapGesture {
-                            board2State.toggleClock()
-                        }
+                        .frame(maxWidth: .infinity)
                     }
                 }
-                
-                // Overlay controls
-                VStack {
-                    Spacer()
-                    HStack(spacing: 20) {
-                        Button(action: {
-                            board1State.togglePause()
-                            board2State.togglePause()
-                        }) {
-                            Image(systemName: board1State.isPaused ? "play.fill" : "pause.fill")
-                                .font(.title)
-                                .foregroundColor(.white)
-                                .frame(width: 60, height: 60)
-                                .background(Color.blue)
-                                .clipShape(Circle())
-                        }
-                        .disabled(!board1State.isRunning)
-                        
-                        Button(action: {
-                            board1State.startNewGame()
-                            board2State.startNewGame()
-                        }) {
-                            Image(systemName: "arrow.clockwise")
-                                .font(.title)
-                                .foregroundColor(.white)
-                                .frame(width: 60, height: 60)
-                                .background(Color.green)
-                                .clipShape(Circle())
-                        }
+            }
+            .navigationTitle("Swedish Chess Clock")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {
+                        showingSettings = true
+                    }) {
+                        Image(systemName: "gear")
                     }
-                    .padding(.bottom, 20)
                 }
             }
-            .navigationBarItems(trailing: Button(action: {
-                showingSettings = true
-            }) {
-                Image(systemName: "gear")
-                    .font(.title2)
-                    .foregroundColor(.primary)
-            })
-        }
-        .sheet(isPresented: $showingSettings) {
-            SettingsView(settings: $settings, isGameRunning: board1State.isRunning)
-        }
-        .onChange(of: settings) { newSettings in
-            board1State.settings = newSettings
-            board2State.settings = newSettings
-            // Reset both boards with new settings
-            board1State.startNewGame()
-            board2State.startNewGame()
-        }
-        .alert("Game Over", isPresented: $board1State.gameOver) {
-            Button("New Game") {
-                board1State.startNewGame()
-                board2State.startNewGame()
+            .sheet(isPresented: $showingSettings) {
+                SettingsView(settings: settings)
             }
-            Button("Keep Current State", role: .cancel) {}
-        } message: {
-            if board1State.winningTeam == 1 {
-                Text("\(board1State.settings.player1Name) and \(board1State.settings.player2Name) win!")
-            } else {
-                Text("\(board1State.settings.player3Name) and \(board1State.settings.player4Name) win!")
-            }
+        }
+        .navigationViewStyle(.stack)
+        .onAppear {
+            // Force landscape orientation
+            UIDevice.current.setValue(UIInterfaceOrientation.landscapeRight.rawValue, forKey: "orientation")
         }
     }
     
-    private func timeString(_ timeInterval: TimeInterval) -> String {
+    private func formatTime(_ timeInterval: TimeInterval) -> String {
         let minutes = Int(timeInterval) / 60
         let seconds = Int(timeInterval) % 60
-        let tenths = Int((timeInterval.truncatingRemainder(dividingBy: 1)) * 10)
-        return String(format: "%02d:%02d.%d", minutes, seconds, tenths)
+        return String(format: "%02d:%02d", minutes, seconds)
     }
 }
 

@@ -8,10 +8,12 @@ enum TimeControlType: String, CaseIterable {
 }
 
 class GameSettings: ObservableObject, Equatable {
-    @Published var player1Name: String = "Player 1"
-    @Published var player2Name: String = "Player 2"
-    @Published var player3Name: String = "Player 3"
-    @Published var player4Name: String = "Player 4"
+    // Player 1 and 3 are in the Top team (opposing each other)
+    // Player 2 and 4 are in the Bottom team (opposing each other)
+    @Published var player1Name: String = "Top Team - Left"
+    @Published var player2Name: String = "Bottom Team - Left"
+    @Published var player3Name: String = "Top Team - Right"
+    @Published var player4Name: String = "Bottom Team - Right"
     @Published var baseMinutes: Int = 5
     @Published var incrementSeconds: Int = 0
     @Published var timeControlType: TimeControlType = .rapid
@@ -28,20 +30,20 @@ class GameSettings: ObservableObject, Equatable {
 }
 
 struct SettingsView: View {
-    @Binding var settings: GameSettings
-    let isGameRunning: Bool
+    @ObservedObject var settings: GameSettings
     @Environment(\.dismiss) private var dismiss
-    @State private var baseMinutesText: String = ""
-    @State private var incrementSecondsText: String = ""
     
     var body: some View {
         NavigationView {
             Form {
-                Section(header: Text("Player Names")) {
-                    TextField("Player 1", text: $settings.player1Name)
-                    TextField("Player 2", text: $settings.player2Name)
-                    TextField("Player 3", text: $settings.player3Name)
-                    TextField("Player 4", text: $settings.player4Name)
+                Section(header: Text("Top Team")) {
+                    TextField("Left Player Name", text: $settings.player1Name)
+                    TextField("Right Player Name", text: $settings.player3Name)
+                }
+                
+                Section(header: Text("Bottom Team")) {
+                    TextField("Left Player Name", text: $settings.player2Name)
+                    TextField("Right Player Name", text: $settings.player4Name)
                 }
                 
                 Section(header: Text("Time Control")) {
@@ -51,45 +53,23 @@ struct SettingsView: View {
                         }
                     }
                     
-                    HStack {
-                        Text("Base Time (minutes):")
-                        TextField("Minutes", text: $baseMinutesText)
-                            .keyboardType(.numberPad)
-                            .onChange(of: baseMinutesText) { newValue in
-                                if let minutes = Int(newValue), minutes >= 1, minutes <= 60 {
-                                    settings.baseMinutes = minutes
-                                }
-                            }
-                            .onAppear {
-                                baseMinutesText = String(settings.baseMinutes)
-                            }
-                    }
-                    
-                    if settings.timeControlType == .rapid || settings.timeControlType == .blitz || settings.timeControlType == .bullet {
-                        HStack {
-                            Text("Increment (seconds):")
-                            TextField("Seconds", text: $incrementSecondsText)
-                                .keyboardType(.numberPad)
-                                .onChange(of: incrementSecondsText) { newValue in
-                                    if let seconds = Int(newValue), seconds >= 0, seconds <= 60 {
-                                        settings.incrementSeconds = seconds
-                                    }
-                                }
-                                .onAppear {
-                                    incrementSecondsText = String(settings.incrementSeconds)
-                                }
-                        }
-                    }
+                    Stepper("Base Time: \(settings.baseMinutes) min", value: $settings.baseMinutes, in: 1...60)
+                    Stepper("Increment: \(settings.incrementSeconds) sec", value: $settings.incrementSeconds, in: 0...30)
                 }
             }
             .navigationTitle("Settings")
-            .navigationBarItems(trailing: Button("Done") {
-                dismiss()
-            })
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                }
+            }
         }
     }
 }
 
 #Preview {
-    SettingsView(settings: .constant(GameSettings()), isGameRunning: false)
+    SettingsView(settings: GameSettings())
 } 
