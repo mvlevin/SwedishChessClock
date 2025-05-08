@@ -2,9 +2,7 @@ import SwiftUI
 
 enum TimeControlType: String, CaseIterable {
     case classical = "Classical"
-    case rapid = "Rapid"
-    case blitz = "Blitz"
-    case bullet = "Bullet"
+    case increment = "Increment"
 }
 
 class GameSettings: ObservableObject, Equatable {
@@ -14,9 +12,28 @@ class GameSettings: ObservableObject, Equatable {
     @Published var player2Name: String = "Bottom Team - Left"
     @Published var player3Name: String = "Top Team - Right"
     @Published var player4Name: String = "Bottom Team - Right"
-    @Published var baseMinutes: Int = 5
+    @Published var baseMinutes: Int = 5 {
+        didSet {
+            resetClocks()
+        }
+    }
     @Published var incrementSeconds: Int = 0
-    @Published var timeControlType: TimeControlType = .rapid
+    @Published var timeControlType: TimeControlType = .classical {
+        didSet {
+            if timeControlType == .classical {
+                incrementSeconds = 0
+            }
+            resetClocks()
+        }
+    }
+    
+    var gameState: GameState?
+    
+    func resetClocks() {
+        if let state = gameState {
+            state.resetGame()
+        }
+    }
     
     static func == (lhs: GameSettings, rhs: GameSettings) -> Bool {
         return lhs.player1Name == rhs.player1Name &&
@@ -54,7 +71,10 @@ struct SettingsView: View {
                     }
                     
                     Stepper("Base Time: \(settings.baseMinutes) min", value: $settings.baseMinutes, in: 1...60)
-                    Stepper("Increment: \(settings.incrementSeconds) sec", value: $settings.incrementSeconds, in: 0...30)
+                    
+                    if settings.timeControlType == .increment {
+                        Stepper("Increment: \(settings.incrementSeconds) sec", value: $settings.incrementSeconds, in: 0...30)
+                    }
                 }
             }
             .navigationTitle("Settings")

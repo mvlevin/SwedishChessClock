@@ -37,7 +37,7 @@ struct ContentView: View {
                             }
                             .onTapGesture {
                                 if !board1State.gameOver {
-                                    board1State.toggleClock()
+                                    board1State.toggleClock(forTeam: 1)
                                 }
                             }
                         }
@@ -59,12 +59,42 @@ struct ContentView: View {
                             }
                             .onTapGesture {
                                 if !board2State.gameOver {
-                                    board2State.toggleClock()
+                                    board2State.toggleClock(forTeam: 1)
                                 }
                             }
                         }
                         .frame(maxWidth: .infinity)
                     }
+                    
+                    // Control buttons
+                    HStack(spacing: 20) {
+                        Button(action: {
+                            board1State.togglePause()
+                            board2State.togglePause()
+                        }) {
+                            Text(board1State.isPaused ? "Resume" : "Pause")
+                                .font(.headline)
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 20)
+                                .padding(.vertical, 10)
+                                .background(Color.blue)
+                                .cornerRadius(10)
+                        }
+                        
+                        Button(action: {
+                            board1State.startNewGame()
+                            board2State.startNewGame()
+                        }) {
+                            Text("New Game")
+                                .font(.headline)
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 20)
+                                .padding(.vertical, 10)
+                                .background(Color.green)
+                                .cornerRadius(10)
+                        }
+                    }
+                    .padding(.vertical, 10)
                     
                     // Bottom team (Players 2 and 4)
                     HStack(spacing: 0) {
@@ -84,7 +114,7 @@ struct ContentView: View {
                             }
                             .onTapGesture {
                                 if !board1State.gameOver {
-                                    board1State.toggleClock()
+                                    board1State.toggleClock(forTeam: 2)
                                 }
                             }
                         }
@@ -106,7 +136,7 @@ struct ContentView: View {
                             }
                             .onTapGesture {
                                 if !board2State.gameOver {
-                                    board2State.toggleClock()
+                                    board2State.toggleClock(forTeam: 2)
                                 }
                             }
                         }
@@ -139,7 +169,8 @@ struct ContentView: View {
     private func formatTime(_ timeInterval: TimeInterval) -> String {
         let minutes = Int(timeInterval) / 60
         let seconds = Int(timeInterval) % 60
-        return String(format: "%02d:%02d", minutes, seconds)
+        let deciseconds = Int((timeInterval * 10).truncatingRemainder(dividingBy: 10))
+        return String(format: "%02d:%02d.%01d", minutes, seconds, deciseconds)
     }
 }
 
@@ -162,18 +193,30 @@ class GameState: ObservableObject {
         self.timeRemaining2 = TimeInterval(settings.baseMinutes * 60)
     }
     
-    func toggleClock() {
+    func resetGame() {
+        timeRemaining1 = TimeInterval(settings.baseMinutes * 60)
+        timeRemaining2 = TimeInterval(settings.baseMinutes * 60)
+        activeTeam = 0
+        isRunning = false
+        isPaused = false
+        gameOver = false
+        winningTeam = 0
+        timer?.invalidate()
+        timer = nil
+    }
+    
+    func toggleClock(forTeam team: Int) {
         if !isRunning {
-            // Start the game with the opposite team
-            activeTeam = activeTeam == 1 ? 2 : 1
+            // Start the game with the opposing team active
+            activeTeam = team == 1 ? 2 : 1
             isRunning = true
             startTimer()
-        } else if !isPaused {
-            // Switch to the other team
+        } else if !isPaused && activeTeam == team {
+            // Only switch if the active team tapped
             activeTeam = activeTeam == 1 ? 2 : 1
             
             // Add increment if using increment time control
-            if settings.timeControlType == .rapid || settings.timeControlType == .blitz || settings.timeControlType == .bullet {
+            if settings.timeControlType == .increment {
                 if activeTeam == 1 {
                     timeRemaining1 += TimeInterval(settings.incrementSeconds)
                 } else {
@@ -184,15 +227,7 @@ class GameState: ObservableObject {
     }
     
     func startNewGame() {
-        isRunning = false
-        isPaused = false
-        gameOver = false
-        activeTeam = 0
-        winningTeam = 0
-        timeRemaining1 = TimeInterval(settings.baseMinutes * 60)
-        timeRemaining2 = TimeInterval(settings.baseMinutes * 60)
-        timer?.invalidate()
-        timer = nil
+        resetGame()
     }
     
     func togglePause() {
