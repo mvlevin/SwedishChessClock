@@ -2,7 +2,7 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var settings: GameSettings
-    @StateObject private var board1State: GameState
+    @StateObject var board1State: GameState
     @StateObject private var board2State: GameState
     @State private var showingSettings = false
     
@@ -153,17 +153,42 @@ struct ContentView: View {
                     }) {
                         Image(systemName: "gear")
                     }
+                    .disabled(board1State.isRunning || board1State.viewingFinalState)
                 }
             }
             .sheet(isPresented: $showingSettings) {
                 SettingsView(settings: settings)
             }
+            .alert("Game Over", isPresented: $board1State.showGameOverAlert) {
+                Button("New Game") {
+                    board1State.startNewGame()
+                    board2State.startNewGame()
+                }
+                Button("View Final State") {
+                    board1State.viewingFinalState = true
+                    board2State.viewingFinalState = true
+                }
+            } message: {
+                Text("\(board1State.getWinningTeamNames()) have won!")
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .timeControlChanged)) { _ in
+                if !board1State.isRunning {
+                    board1State.timeRemaining1 = TimeInterval(settings.baseMinutes * 60)
+                    board1State.timeRemaining2 = TimeInterval(settings.baseMinutes * 60)
+                    board2State.timeRemaining1 = TimeInterval(settings.baseMinutes * 60)
+                    board2State.timeRemaining2 = TimeInterval(settings.baseMinutes * 60)
+                }
+            }
+            .onAppear {
+                // Force landscape orientation
+                UIDevice.current.setValue(UIInterfaceOrientation.landscapeRight.rawValue, forKey: "orientation")
+                
+                // Connect the boards to each other
+                board1State.otherBoard = board2State
+                board2State.otherBoard = board1State
+            }
         }
         .navigationViewStyle(.stack)
-        .onAppear {
-            // Force landscape orientation
-            UIDevice.current.setValue(UIInterfaceOrientation.landscapeRight.rawValue, forKey: "orientation")
-        }
     }
     
     private func formatTime(_ timeInterval: TimeInterval) -> String {
@@ -183,9 +208,12 @@ class GameState: ObservableObject {
     @Published var isPaused: Bool = false
     @Published var gameOver: Bool = false
     @Published var winningTeam: Int = 0  // 0: none, 1: team1, 2: team2
+    @Published var showGameOverAlert: Bool = false
+    @Published var viewingFinalState: Bool = false
     
     private var timer: Timer?
     private let updateInterval: TimeInterval = 0.1
+    weak var otherBoard: GameState?
     
     init(settings: GameSettings) {
         self.settings = settings
@@ -201,11 +229,24 @@ class GameState: ObservableObject {
         isPaused = false
         gameOver = false
         winningTeam = 0
+        showGameOverAlert = false
+        viewingFinalState = false
         timer?.invalidate()
         timer = nil
     }
     
     func toggleClock(forTeam team: Int) {
+        // First check if the game is already over (either from this board or the other board)
+        if gameOver || (otherBoard?.gameOver ?? false) {
+            return
+        }
+        
+        // Check if time has run out for either team
+        if (activeTeam == 1 && timeRemaining1 <= 0) || (activeTeam == 2 && timeRemaining2 <= 0) {
+            endGame(winningTeam: activeTeam == 1 ? 2 : 1)
+            return
+        }
+        
         if !isRunning {
             // Start the game with the opposing team active
             activeTeam = team == 1 ? 2 : 1
@@ -245,26 +286,70 @@ class GameState: ObservableObject {
         timer = Timer.scheduledTimer(withTimeInterval: updateInterval, repeats: true) { [weak self] _ in
             guard let self = self else { return }
             
+            // Don't decrease time if game is over
+            if self.gameOver || (self.otherBoard?.gameOver ?? false) {
+                self.timer?.invalidate()
+                self.timer = nil
+                return
+            }
+            
             if self.activeTeam == 1 {
                 self.timeRemaining1 -= self.updateInterval
                 if self.timeRemaining1 <= 0 {
                     self.timeRemaining1 = 0
                     self.gameOver = true
-                    self.winningTeam = 2
-                    self.timer?.invalidate()
-                    self.timer = nil
+                    self.endGame(winningTeam: 2)
                 }
             } else if self.activeTeam == 2 {
                 self.timeRemaining2 -= self.updateInterval
                 if self.timeRemaining2 <= 0 {
                     self.timeRemaining2 = 0
                     self.gameOver = true
-                    self.winningTeam = 1
-                    self.timer?.invalidate()
-                    self.timer = nil
+                    self.endGame(winningTeam: 1)
                 }
             }
         }
+    }
+    
+    private func endGame(winningTeam: Int) {
+        // Stop this board's timer and update state
+        self.gameOver = true
+        self.winningTeam = winningTeam
+        self.isRunning = false
+        self.activeTeam = 0
+        self.timer?.invalidate()
+        self.timer = nil
+        self.isPaused = false
+        self.showGameOverAlert = true
+        
+        // Stop the other board's timer and update its state
+        if let otherBoard = otherBoard {
+            otherBoard.gameOver = true
+            otherBoard.winningTeam = winningTeam
+            otherBoard.isRunning = false
+            otherBoard.activeTeam = 0
+            otherBoard.timer?.invalidate()
+            otherBoard.timer = nil
+            otherBoard.isPaused = false
+            otherBoard.showGameOverAlert = true
+        }
+    }
+    
+    func stopGame() {
+        self.gameOver = true
+        self.isRunning = false
+        self.activeTeam = 0
+        self.timer?.invalidate()
+        self.timer = nil
+    }
+    
+    func getWinningTeamNames() -> String {
+        if winningTeam == 1 {
+            return "\(settings.player1Name) and \(settings.player3Name)"
+        } else if winningTeam == 2 {
+            return "\(settings.player2Name) and \(settings.player4Name)"
+        }
+        return ""
     }
 }
 

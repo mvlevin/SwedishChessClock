@@ -14,16 +14,26 @@ class GameSettings: ObservableObject, Equatable {
     @Published var player4Name: String = "Bottom Team - Right"
     @Published var baseMinutes: Int = 5 {
         didSet {
-            resetClocks()
+            if oldValue != baseMinutes {
+                NotificationCenter.default.post(name: .timeControlChanged, object: nil)
+            }
         }
     }
-    @Published var incrementSeconds: Int = 0
+    @Published var incrementSeconds: Int = 0 {
+        didSet {
+            if oldValue != incrementSeconds {
+                NotificationCenter.default.post(name: .timeControlChanged, object: nil)
+            }
+        }
+    }
     @Published var timeControlType: TimeControlType = .classical {
         didSet {
-            if timeControlType == .classical {
-                incrementSeconds = 0
+            if oldValue != timeControlType {
+                if timeControlType == .classical {
+                    incrementSeconds = 0
+                }
+                NotificationCenter.default.post(name: .timeControlChanged, object: nil)
             }
-            resetClocks()
         }
     }
     
@@ -46,45 +56,75 @@ class GameSettings: ObservableObject, Equatable {
     }
 }
 
+extension Notification.Name {
+    static let timeControlChanged = Notification.Name("timeControlChanged")
+}
+
 struct SettingsView: View {
-    @ObservedObject var settings: GameSettings
     @Environment(\.dismiss) private var dismiss
+    @ObservedObject var settings: GameSettings
+    @State private var tempSettings: GameSettings
+    @State private var isGameRunning: Bool
+    
+    init(settings: GameSettings) {
+        self.settings = settings
+        _tempSettings = State(initialValue: settings)
+        _isGameRunning = State(initialValue: false)
+    }
     
     var body: some View {
         NavigationView {
             Form {
-                Section(header: Text("Top Team")) {
-                    TextField("Left Player Name", text: $settings.player1Name)
-                    TextField("Right Player Name", text: $settings.player3Name)
-                }
-                
-                Section(header: Text("Bottom Team")) {
-                    TextField("Left Player Name", text: $settings.player2Name)
-                    TextField("Right Player Name", text: $settings.player4Name)
+                Section(header: Text("Player Names")) {
+                    TextField("Player 1 (Top Left)", text: $tempSettings.player1Name)
+                    TextField("Player 2 (Bottom Left)", text: $tempSettings.player2Name)
+                    TextField("Player 3 (Top Right)", text: $tempSettings.player3Name)
+                    TextField("Player 4 (Bottom Right)", text: $tempSettings.player4Name)
                 }
                 
                 Section(header: Text("Time Control")) {
-                    Picker("Type", selection: $settings.timeControlType) {
+                    Picker("Type", selection: $tempSettings.timeControlType) {
                         ForEach(TimeControlType.allCases, id: \.self) { type in
                             Text(type.rawValue).tag(type)
                         }
                     }
+                    .disabled(isGameRunning)
                     
-                    Stepper("Base Time: \(settings.baseMinutes) min", value: $settings.baseMinutes, in: 1...60)
+                    Stepper("Base Time: \(tempSettings.baseMinutes) minutes", value: $tempSettings.baseMinutes, in: 1...60)
+                        .disabled(isGameRunning)
                     
-                    if settings.timeControlType == .increment {
-                        Stepper("Increment: \(settings.incrementSeconds) sec", value: $settings.incrementSeconds, in: 0...30)
+                    if tempSettings.timeControlType == .increment {
+                        Stepper("Increment: \(tempSettings.incrementSeconds) seconds", value: $tempSettings.incrementSeconds, in: 0...30)
+                            .disabled(isGameRunning)
                     }
                 }
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") {
                         dismiss()
                     }
                 }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Save") {
+                        settings.player1Name = tempSettings.player1Name
+                        settings.player2Name = tempSettings.player2Name
+                        settings.player3Name = tempSettings.player3Name
+                        settings.player4Name = tempSettings.player4Name
+                        settings.baseMinutes = tempSettings.baseMinutes
+                        settings.incrementSeconds = tempSettings.incrementSeconds
+                        settings.timeControlType = tempSettings.timeControlType
+                        dismiss()
+                    }
+                }
+            }
+        }
+        .onAppear {
+            // Check if game is running
+            if let gameState = (UIApplication.shared.windows.first?.rootViewController as? UIHostingController<ContentView>)?.rootView.board1State {
+                isGameRunning = gameState.isRunning && !gameState.gameOver
             }
         }
     }
