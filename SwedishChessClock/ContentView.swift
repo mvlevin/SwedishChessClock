@@ -1,13 +1,13 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var settings: GameSettings
+    @ObservedObject var settings: GameSettings
     @StateObject var board1State: GameState
     @StateObject private var board2State: GameState
     @State private var showingSettings = false
     
     init(settings: GameSettings) {
-        _settings = State(initialValue: settings)
+        self.settings = settings
         _board1State = StateObject(wrappedValue: GameState(settings: settings))
         _board2State = StateObject(wrappedValue: GameState(settings: settings))
     }
@@ -72,7 +72,7 @@ struct ContentView: View {
                             board1State.togglePause()
                             board2State.togglePause()
                         }) {
-                            Text(board1State.isPaused ? "Resume" : "Pause")
+                            Image(systemName: board1State.isPaused ? "play.fill" : "pause.fill")
                                 .font(.headline)
                                 .foregroundColor(.white)
                                 .padding(.horizontal, 20)
@@ -85,7 +85,7 @@ struct ContentView: View {
                             board1State.startNewGame()
                             board2State.startNewGame()
                         }) {
-                            Text("New Game")
+                            Image(systemName: "arrow.clockwise")
                                 .font(.headline)
                                 .foregroundColor(.white)
                                 .padding(.horizontal, 20)
@@ -144,7 +144,7 @@ struct ContentView: View {
                     }
                 }
             }
-            .navigationTitle("Swedish Chess Clock")
+            .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -187,6 +187,10 @@ struct ContentView: View {
                 board1State.otherBoard = board2State
                 board2State.otherBoard = board1State
             }
+            .onChange(of: settings) { newSettings in
+                board1State.settings = newSettings
+                board2State.settings = newSettings
+            }
         }
         .navigationViewStyle(.stack)
     }
@@ -200,7 +204,12 @@ struct ContentView: View {
 }
 
 class GameState: ObservableObject {
-    @Published var settings: GameSettings
+    @Published var settings: GameSettings {
+        didSet {
+            // Update player names when settings change
+            objectWillChange.send()
+        }
+    }
     @Published var timeRemaining1: TimeInterval
     @Published var timeRemaining2: TimeInterval
     @Published var activeTeam: Int = 0  // 0: none, 1: team1, 2: team2
