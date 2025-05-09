@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 54;
+	objectVersion = 56;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -15,7 +15,7 @@
 /* Begin PBXFileReference section */
 		0B804DD6F4B329A08E917E6C /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		9A6D74E58BA98ABAE09D39B3 /* SwedishChessClockApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwedishChessClockApp.swift; sourceTree = "<group>"; };
-		C9623747BEF61C646AA820CD /* SwedishChessClock.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = SwedishChessClock.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C9623747BEF61C646AA820CD /* SwedishChessClock.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SwedishChessClock.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D987EE9B294645B8D9921610 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		DD3081822AF2E95F3FA0FD2C /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -76,8 +76,6 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1430;
-				TargetAttributes = {
-				};
 			};
 			buildConfigurationList = A7518CEA8777DAA2A7305101 /* Build configuration list for PBXProject "SwedishChessClock" */;
 			compatibilityVersion = "Xcode 14.0";
@@ -88,8 +86,6 @@
 				en,
 			);
 			mainGroup = D3767671D3722AA16FF7CF74;
-			minimizedProjectReferenceProxies = 1;
-			preferredProjectObjectVersion = 54;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -180,6 +176,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = FY8PR2Y7L2;
 				INFOPLIST_FILE = SwedishChessClock/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -196,6 +193,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = FY8PR2Y7L2;
 				INFOPLIST_FILE = SwedishChessClock/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
