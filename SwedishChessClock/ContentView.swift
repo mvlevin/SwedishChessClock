@@ -267,7 +267,7 @@ class GameState: ObservableObject {
             
             // Add increment if using increment time control
             if settings.timeControlType == .increment {
-                if activeTeam == 1 {
+                if team == 1 {
                     timeRemaining1 += TimeInterval(settings.incrementSeconds)
                 } else {
                     timeRemaining2 += TimeInterval(settings.incrementSeconds)
