@@ -267,10 +267,11 @@ class GameState: ObservableObject {
             
             // Add increment if using increment time control
             if settings.timeControlType == .increment {
+                let initialTime = TimeInterval(settings.baseMinutes * 60)
                 if team == 1 {
-                    timeRemaining1 += TimeInterval(settings.incrementSeconds)
+                    timeRemaining1 = min(timeRemaining1 + TimeInterval(settings.incrementSeconds), initialTime)
                 } else {
-                    timeRemaining2 += TimeInterval(settings.incrementSeconds)
+                    timeRemaining2 = min(timeRemaining2 + TimeInterval(settings.incrementSeconds), initialTime)
                 }
             }
         }
