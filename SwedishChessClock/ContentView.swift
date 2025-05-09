@@ -18,10 +18,10 @@ struct ContentView: View {
                 Color(.systemBackground).edgesIgnoringSafeArea(.all)
                 
                 // Main layout with top team vs bottom team
-                VStack(spacing: 0) {
-                    // Top team (Players 1 and 3)
-                    HStack(spacing: 0) {
-                        // Left side (Player 1)
+                HStack(spacing: 0) {
+                    // Left side (Top team - Players 1 and 3)
+                    VStack(spacing: 0) {
+                        // Player 1
                         VStack {
                             Text(settings.player1Name)
                                 .font(.headline)
@@ -44,7 +44,7 @@ struct ContentView: View {
                         .frame(maxWidth: .infinity)
                         .rotationEffect(.degrees(180))
                         
-                        // Right side (Player 3)
+                        // Player 3
                         VStack {
                             Text(settings.player3Name)
                                 .font(.headline)
@@ -65,11 +65,11 @@ struct ContentView: View {
                             }
                         }
                         .frame(maxWidth: .infinity)
-                        .rotationEffect(.degrees(180))
                     }
+                    .frame(maxWidth: .infinity)
                     
                     // Control buttons
-                    HStack(spacing: 20) {
+                    VStack(spacing: 20) {
                         Button(action: {
                             board1State.togglePause()
                             board2State.togglePause()
@@ -94,11 +94,12 @@ struct ContentView: View {
                                 .cornerRadius(10)
                         }
                     }
-                    .padding(.vertical, 10)
+                    .padding(.horizontal, 20)
+                    .rotationEffect(.degrees(270))
                     
-                    // Bottom team (Players 2 and 4)
-                    HStack(spacing: 0) {
-                        // Left side (Player 2)
+                    // Right side (Bottom team - Players 2 and 4)
+                    VStack(spacing: 0) {
+                        // Player 2
                         VStack {
                             Text(settings.player2Name)
                                 .font(.headline)
@@ -119,8 +120,9 @@ struct ContentView: View {
                             }
                         }
                         .frame(maxWidth: .infinity)
+                        .rotationEffect(.degrees(180))
                         
-                        // Right side (Player 4)
+                        // Player 4
                         VStack {
                             Text(settings.player4Name)
                                 .font(.headline)
@@ -142,12 +144,13 @@ struct ContentView: View {
                         }
                         .frame(maxWidth: .infinity)
                     }
+                    .frame(maxWidth: .infinity)
                 }
             }
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItem(placement: .navigationBarLeading) {
                     Button(action: {
                         showingSettings = true
                     }) {
@@ -170,6 +173,15 @@ struct ContentView: View {
                 }
             } message: {
                 Text("\(board1State.getWinningTeamNames()) have won!")
+            }
+            .onChange(of: board1State.showGameOverAlert) { isShowing in
+                if isShowing {
+                    // Force portrait orientation when alert is shown
+                    UIDevice.current.setValue(UIInterfaceOrientation.portrait.rawValue, forKey: "orientation")
+                } else {
+                    // Return to landscape orientation when alert is dismissed
+                    UIDevice.current.setValue(UIInterfaceOrientation.landscapeRight.rawValue, forKey: "orientation")
+                }
             }
             .onReceive(NotificationCenter.default.publisher(for: .timeControlChanged)) { _ in
                 if !board1State.isRunning {
