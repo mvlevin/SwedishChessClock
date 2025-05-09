@@ -42,6 +42,7 @@ struct ContentView: View {
                             }
                         }
                         .frame(maxWidth: .infinity)
+                        .rotationEffect(.degrees(180))
                         
                         // Right side (Player 3)
                         VStack {
@@ -64,6 +65,7 @@ struct ContentView: View {
                             }
                         }
                         .frame(maxWidth: .infinity)
+                        .rotationEffect(.degrees(180))
                     }
                     
                     // Control buttons
