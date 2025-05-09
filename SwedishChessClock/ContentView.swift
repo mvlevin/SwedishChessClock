@@ -77,8 +77,7 @@ struct ContentView: View {
                             Image(systemName: board1State.isPaused ? "play.fill" : "pause.fill")
                                 .font(.headline)
                                 .foregroundColor(.white)
-                                .padding(.horizontal, 20)
-                                .padding(.vertical, 10)
+                                .frame(width: 100, height: 40)
                                 .background(Color.blue)
                                 .cornerRadius(10)
                         }
@@ -90,8 +89,7 @@ struct ContentView: View {
                             Image(systemName: "arrow.clockwise")
                                 .font(.headline)
                                 .foregroundColor(.white)
-                                .padding(.horizontal, 20)
-                                .padding(.vertical, 10)
+                                .frame(width: 100, height: 40)
                                 .background(Color.green)
                                 .cornerRadius(10)
                         }
